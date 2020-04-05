@@ -1,0 +1,17 @@
+{
+  "name": "eleventy-plugin-error-overlay",
+  "author": "Steven Petryk",
+  "version": "0.1.0",
+  "main": "index.js",
+  "license": "WTFPL",
+  "peerDependencies": {
+    "@11ty/eleventy": "^0.x",
+    "nunjucks": "^3.x"
+  },
+  "dependencies": {
+    "error-stack-parser": "^2.0.6"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.2"
+  }
+}
