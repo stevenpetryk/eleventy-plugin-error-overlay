@@ -30,7 +30,6 @@ module.exports = {
       }
 
       function error(originalError, buildError) {
-        console.log("BOOP", buildError)
         if (!context) {
           return
         }
