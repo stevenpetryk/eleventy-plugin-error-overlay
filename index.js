@@ -22,21 +22,23 @@ module.exports = {
 
       let context = null
 
-      function _watch(originalWatch) {
+      function _watch(watchFn) {
         context = this
         errorToShow = null
 
-        return originalWatch.apply(this)
+        return watchFn.apply(this)
       }
 
-      function error(originalError, buildError) {
+      function error(errorFn, buildError, message) {
+        const result = errorFn(buildError, message)
+
         if (!context) {
-          return
+          return result
         }
 
         errorToShow = buildError
         context.eleventyServe.reload()
-        return originalError.apply(this)
+        return result
       }
 
       override(Eleventy, _watch)
@@ -78,11 +80,11 @@ function override(obj, fn) {
   obj.prototype[fn.name] = wrapper
 }
 
-function overrideStatic(obj, fxn) {
-  const original_fxn = obj[fxn.name].__original || obj[fxn.name]
+function overrideStatic(obj, fn) {
+  const originalFn = obj[fn.name].__original || obj[fn.name]
   function wrapper() {
-    return fxn.bind(this, original_fxn).apply(this, arguments)
+    return fn.bind(this, originalFn).apply(this, arguments)
   }
-  wrapper.__original = original_fxn
-  obj[fxn.name] = wrapper
+  wrapper.__original = originalFn
+  obj[fn.name] = wrapper
 }
