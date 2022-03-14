@@ -30,7 +30,7 @@ module.exports = {
       }
 
       function error(errorFn, buildError, message) {
-        const result = errorFn(buildError, message)
+        const result = errorFn.apply(this, [buildError, message])
 
         if (!context) {
           return result
@@ -42,7 +42,7 @@ module.exports = {
       }
 
       override(Eleventy, _watch)
-      overrideStatic(EleventyErrorHandler, error)
+      override(EleventyErrorHandler, error)
     })
   },
 }
@@ -66,6 +66,10 @@ async function showErrorMiddleware(req, res, next) {
     stackTrace,
   })
 
+  // Reset error state to prevent error from rendering on every single page load. Error may potentially be fixed
+  // outside of 11ty's global set of watched files (e.g. separate plugin with independent watches triggered an error).
+  errorToShow = null;
+
   res.status = 500
   res.setHeader("content-type", "text/html")
   res.end(renderedPage)
@@ -78,13 +82,4 @@ function override(obj, fn) {
   }
   wrapper.__original = originalFn
   obj.prototype[fn.name] = wrapper
-}
-
-function overrideStatic(obj, fn) {
-  const originalFn = obj[fn.name].__original || obj[fn.name]
-  function wrapper() {
-    return fn.bind(this, originalFn).apply(this, arguments)
-  }
-  wrapper.__original = originalFn
-  obj[fn.name] = wrapper
 }
